@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>jQuery SPA</title>
+  <style>
+    main {
+      width: 500px;
+      margin: 0 auto;
+    }
+
+    .edit {
+      margin: 0 5px;
+    }
+  </style>
+  <script src="./jquery.min.js"></script>
+</head>
+<body>
+<main>
+  <h2>Todo List - jQuery SPA</h2>
+
+  <form id="todo-form">
+    <input type="text" name="todo_text">
+    <button type="submit">Add</button>
+  </form>
+
+  <ul id="todo-list">
+    <li><span>foo</span><button class="edit">Edit</button><button class="remove">Remove</button></li>
+    <li><span>bar</span><button class="edit">Edit</button><button class="remove">Remove</button></li>
+  </ul>
+
+</main>
+<script>
+
+  (function () {
+
+    'use strict';
+
+    /*locals*/
+    var $input, $todoList, editMode;
+
+    $input = $('input[name="todo_text"]');
+    $todoList = $('#todo-list');
+
+    /*listeners*/
+    $('#todo-form').on('submit', addTodoItemListener);
+//    $todoList.find('.remove').on('click', removeTodoItemListener);
+    $todoList.on('click', 'button.remove', removeTodoItemListener); //event delegate technique
+    $todoList.on('click', 'button.edit', editTodoItemListener); //event delegate technique
+
+
+    /*function declarations*/
+
+    //onSubmit listener of todo-list form.
+    function addTodoItemListener(evt) {
+      var todoText;
+
+        $('#todo-form').children('button[type="submit"]').text('Add');
+
+
+      //prevent submit event's default behaviour
+      evt.preventDefault();
+
+      //take the value from the input
+      todoText = $input.val();
+
+      if (editMode === undefined) {
+
+        //create a <li> and add that value to it and append the <li> into <ul>
+        $todoList.append(createTodoItemString(todoText));
+
+      } else {
+
+        //grab the selected node by it's index
+        $todoList
+            .find('li').eq(editMode)
+            .find('span').text(todoText);
+
+        //remove the editMode index for new todo-items
+        editMode = undefined;
+      }
+
+
+
+      //add event listeners to the .edit and .remove buttons
+//      $todoList.find('.remove')
+//          .off('click')
+//          .on('click', removeTodoItemListener);
+
+      //empty the input field
+      $input.val('');
+
+    }
+
+
+    //edit/rename the list item whose .remove button was clicked
+    function editTodoItemListener(evt) {
+      var text;
+
+      console.log('edit clicked');
+
+      //take the index and keep the index in edit mode flag
+      editMode = $(this).closest('li').index();
+
+
+      //parse text from the selected list item
+      text = $(this).siblings('span').text();
+
+      //add the text to input field
+      $input.val(text);
+
+       $('#todo-form').children('button[type="submit"]').text('Save');
+
+    }
+
+    //removes the list item whose .remove button was clicked
+    function removeTodoItemListener(evt) {
+//      console.log('remove clicked');
+
+      $(this)
+          .closest('li')
+          .remove();
+
+    }
+
+    //build todo-item string
+    function createTodoItemString(todoText) {
+      var string;
+
+      //build string
+      string = '<li>' +
+          '<span>' + todoText + '</span>' +
+          '<button class="edit">Edit</button>' +
+          '<button class="remove">Remove</button>' +
+          '</li>';
+
+      return string;
+    }
+
+
+  })();
+
+</script>
+</body>
+</html>
